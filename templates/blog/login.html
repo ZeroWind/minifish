@@ -1,0 +1,35 @@
+{% extends 'blog/base.html' %}
+{% load static %}
+
+
+{% block title %}网站管理{% endblock %}
+
+{% block body_block %}
+<div class="hero-unit">
+    <h1>Login</h1>
+
+    <div class="container-fluid">
+
+        {% if user.is_authenticated %}
+            <h2>"You are logged in."</h2>
+        {% else %}
+        <form class="form-signin span4" id="login_form" method="post" action="/login/">
+            <h2 class="form-signin-heading">Please sign in</h2>
+            {% csrf_token %}
+
+            {% if bad_details %}
+            <p><strong>帐号名或密码错误</strong></p>
+            {% elif disabled_account %}
+            <p><strong>你的帐号已停用, 请联系管理员激活</strong></p>
+            {% endif %}
+            <label>Username:</label><input type="text" class="form-control" placeholder="Username" name="username" value="" size="50" />
+            <br />
+            <label>Password:</label><input type="password" class="form-control" placeholder="Password" name="password" value="" size="50" />
+            <br />
+            <button class="btn btn-primary" type="submit">Sign in</button>
+        </form>
+            {% endif %}
+    </div><!-- /container -->
+
+</div>
+{% endblock %}

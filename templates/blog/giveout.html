@@ -1,0 +1,36 @@
+{% extends 'blog/base.html' %}
+{% load static %}
+
+
+{% block title %}首页{% endblock %}
+
+{% block body_block %}
+
+        <h1><strong>文章发表</strong></h1>
+
+        <form class="form-signin span8" id="giveout_form" method="post" action="">
+            {% csrf_token %}
+
+            {% for hidden in giveout_form.hidden_fields %}
+            {{ hidden }}
+            {% endfor %}
+
+            {% for field in giveout_form.visible_fields %}
+                {{ field.errors }}
+                <strong>{{ field.label }}</strong>     <small>{{field.help_text}}</small><br/>
+                {{ field }}<br/><br/>
+            {% endfor %}
+
+            {% for field in tags_form.visible_fields %}
+                {{ field.errors }}
+                <strong>{{ field.label }}</strong>     <small>{{field.help_text}}</small><br/>
+                {{ field }}<br /><br/>
+            {% endfor %}
+            <br /><br />
+
+            <input type="submit" name="submit" value="发表" />
+        </form>
+
+
+
+{% endblock %}

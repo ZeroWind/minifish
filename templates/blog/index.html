@@ -1,0 +1,17 @@
+{% extends 'blog/base.html' %}
+{% load static %}
+
+
+{% block title %}首页{% endblock %}
+
+{% block body_block %}
+
+    <ul>
+        {% for t in title_list %}
+        <li>
+            {{ t.title }}
+        </li>
+        {% endfor %}
+    </ul>
+
+{% endblock %}
