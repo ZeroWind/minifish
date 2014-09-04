@@ -9,15 +9,9 @@ class Tag(models.Model):
     def __unicode__(self):
         return self.tag_name
 
-class Profile(models.Model):
-    user = models.OneToOneField(User)
-
-    def __unicode__(self):
-        return self.user.get_full_name()
-
 class Blog(models.Model):
     title = models.CharField('文章标题', max_length=128)
-    author = models.CharField(max_length=50)
+    author = models.ForeignKey(User)
     content =models.TextField('内容')
     tags = models.ManyToManyField(Tag, blank=True)
     createtime = models.DateTimeField('发布日期', auto_now_add=True)
@@ -25,6 +19,9 @@ class Blog(models.Model):
     likes = models.IntegerField(default=0)
     views = models.IntegerField(default=0)
 
+    class Meta:
+        ordering = ['-modified']
+
     def __unicode__(self):
-        return self.title + ' : ' + self.author
+        return self.title
 
