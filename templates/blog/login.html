@@ -5,7 +5,7 @@
 {% block title %}网站管理{% endblock %}
 
 {% block body_block %}
-<div class="hero-unit">
+<div class="hero-unit box">
     <h1>Login</h1>
 
     <div class="container-fluid">
@@ -14,7 +14,6 @@
             <h2>"You are logged in."</h2>
         {% else %}
         <form class="form-signin span4" id="login_form" method="post" action="">
-            <h2 class="form-signin-heading">Please sign in</h2>
             {% csrf_token %}
 
             {% if bad_details %}
@@ -30,7 +29,7 @@
             <button class="btn btn-primary" type="submit">Sign in</button>
 
         </form>
-            {% endif %}
+        {% endif %}
     </div><!-- /container -->
 
 </div>

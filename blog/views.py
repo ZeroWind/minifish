@@ -6,6 +6,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from blog.forms import GiveoutForm, TagForm
 from django.contrib.auth.models import User
+from django.db.models import Q
+import json
 
 # mine
 def index(request):
@@ -13,11 +15,12 @@ def index(request):
     context = RequestContext(request)
     context_dict ={}
 
-    title_list = Blog.objects.order_by('-views')[:10]
+    title_list = Blog.objects.order_by('-views')[:5]
     if title_list:
         context_dict['title_list'] = title_list
 
     context_dict['base_tags'] = get_tags()
+    context_dict['base_views'] = get_views()
     return render_to_response('blog/index.html', context_dict, context)
 
 
@@ -67,7 +70,7 @@ def giveout(request, id=''):
             # 编辑
             blog = get_object_or_404(Blog, pk=id)
             tags = blog.tags.all()
-            giveout_form = GiveoutForm(initial={'title':blog.title, 'content':blog.content}, auto_id=False)
+            giveout_form = GiveoutForm(initial={'title':blog.title, 'content':blog.content}, ) # auto_id=False
             tag_str_list = []
             for t in tags:
                 tag_str_list.append(str(t))
@@ -80,10 +83,11 @@ def giveout(request, id=''):
 
     context_dict = {'giveout_form':giveout_form, 'tags_form':tags_form}
     context_dict['base_tags'] = get_tags()
+    context_dict['base_views'] = get_views()
     return render_to_response('blog/giveout.html', context_dict, context)
 
 
-def article_show(request, id=''):
+def article_show(request, id='', readviews=1):
     ''' Article detail Show'''
     context = RequestContext(request)
     context_dict = {}
@@ -91,9 +95,25 @@ def article_show(request, id=''):
     detail = get_object_or_404(Blog, pk=id)
     tags = detail.tags.all()
 
+    views_count = 0
+    views_count = detail.views + 1    # 阅读数, 未跟cookie绑定
+    Blog.objects.filter(pk=id).update(views=views_count)
+
+    try:
+        if Blog.objects.get(pk=int(id)+1):
+            context_dict['previous_id'] = Blog.objects.get(pk=int(id)+1)
+    except:
+        context_dict['previous_id'] = None
+    try:
+        if Blog.objects.get(pk=int(id)-1):
+            context_dict['next_id'] = Blog.objects.get(pk=int(id)-1)
+    except:
+        context_dict['next_id'] = None
+
     context_dict['detail'] = detail
     context_dict['tags'] = tags
     context_dict['base_tags'] = get_tags()
+    context_dict['base_views'] = get_views()
     return render_to_response('blog/article_show.html', context_dict, context)
 
 
@@ -106,9 +126,9 @@ def article_list(request):
     context_dict = {}
 
     #  分页
-    limit = 5
-    arct = Blog.objects.all()
-    paginator = Paginator(arct, limit)
+    limit = 10
+    arct_list = Blog.objects.all().order_by("-createtime")
+    paginator = Paginator(arct_list, limit)
 
     page = request.GET.get('page')
     try:
@@ -120,9 +140,25 @@ def article_list(request):
 
     context_dict['topics'] = topics
     context_dict['base_tags'] = get_tags()
+    context_dict['base_views'] = get_views()
     return render_to_response('blog/articles.html',context_dict, context)
 
 # other
+def like_article(request):
+    '''赞 Ajax'''
+    context = RequestContext(request)
+    cat_id = None
+    if request.method == 'GET':
+        cat_id = request.GET['article_id']
+    likes = 0
+    if cat_id:
+        articlelike = Blog.objects.get(id=int(cat_id))
+        if articlelike:
+            likes = articlelike.likes +1
+            articlelike.likes = likes
+            articlelike.save()
+    return HttpResponse(likes)
+
 def tag_filter(request, id=''):
     '''标签过滤页面'''
     context = RequestContext(request)
@@ -130,8 +166,9 @@ def tag_filter(request, id=''):
     tag = Tag.objects.get(id=id)
     blogs = tag.blog_set.all()
 
-    context_dict = {'blogs':blogs, 'tag':tag}
+    context_dict = {'blogs':blogs}
     context_dict['base_tags'] = get_tags()
+    context_dict['base_views'] = get_views()
     return render_to_response('blog/tag_filter.html', context_dict, context)
 
 def get_tags(id=''):
@@ -139,12 +176,31 @@ def get_tags(id=''):
     base_tags = Tag.objects.all()
     return base_tags
 
+def get_views():
+    '''点击排行侧边栏'''
+    base_views = Blog.objects.order_by('-views')[:5]
+    return base_views
+
+def get_search(request):
+    context = RequestContext(request)
+    context_dict = {}
+    if 'search' in request.GET:
+        srarch = request.GET['search']
+        search_blogs = Blog.objects.filter(Q(content__icontains=srarch)|Q(title__icontains=srarch))
+
+    context_dict['blogs'] = search_blogs
+    context_dict['base_tags'] = get_tags()
+    context_dict['base_views'] = get_views()
+    return render_to_response('blog/tag_filter.html', context_dict, context)
+
 def about(request):
     ''' About Show '''
     context = RequestContext(request)
     context_dict = {}
     context_dict['base_tags'] = get_tags()
+    context_dict['base_views'] = get_views()
     return render_to_response('blog/about.html', context_dict, context)
+
 
 # 登录&注销
 def user_login(request):
@@ -158,6 +214,7 @@ def user_login(request):
         next = '/'
 
     context_dict['base_tags'] = get_tags()
+    context_dict['base_views'] = get_views()
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -187,6 +244,8 @@ def user_logout(request):
     ''' Logout '''
     logout(request)
     return HttpResponseRedirect(reverse('index'))
+
+
 
 
 

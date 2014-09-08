@@ -2,10 +2,15 @@
 from django import forms
 from blog.models import Blog, Tag
 from django.contrib.auth.models import User
+# from django.utils.translation import ugettext as _
+
+from pagedown.widgets import PagedownWidget
+
 
 class GiveoutForm(forms.Form):
-    title = forms.CharField(label='标题', max_length=128)
-    content = forms.CharField(label='内容', widget=forms.Textarea)
+    title = forms.CharField(label='标题', max_length=128,widget=forms.TextInput(attrs={'class':'form-control'}))
+    # content = forms.CharField(label='内容', widget=forms.Textarea(attrs={'rows':10, 'cols':80, 'class':'form-control', 'id':'id_content'}))
+    content = forms.CharField(label='内容', widget=PagedownWidget(show_preview=True,css=("css/demo.css",), attrs={'class':' form-control'}), help_text='支持Markdown语法: <a href="http://wowubuntu.com/markdown/">语法说明</a>')
     views = forms.IntegerField(widget=forms.HiddenInput(), initial=0)   # 封装一组隐藏输入元素
     likes = forms.IntegerField(widget=forms.HiddenInput(), initial=0)
 
@@ -23,7 +28,7 @@ class GiveoutForm(forms.Form):
     #     raise forms.ValidationError("User Name has been taken!")
 
 class TagForm(forms.ModelForm):
-    tag_name = forms.CharField(label='标签组', help_text="用逗号或空格分隔标签")
+    tag_name = forms.CharField(label='标签组', help_text="用逗号或空格分隔标签", widget=forms.TextInput(attrs={'class':'form-control'}))
 
     class Meta:
         model = Tag

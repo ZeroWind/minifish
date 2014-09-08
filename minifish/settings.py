@@ -37,6 +37,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'markdown_deux',    # sudo pip install django-markdown-deux
+    'pagedown',         # sudo pip install django-pagedown
     'blog',
 )
 
@@ -95,3 +97,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(PROJECT_PATH, 'media')
 
 LOGIN_URL = '/login/'
+
+PAGEDOWN_SHOW_PREVIEW = True
+# PAGEDOWN_DEFAULT_TEMPLATE = 'pagedown/widgets/default.html'
+# PAGEDOWN_WIDGET_CSS = ('pagedown/demo/browser/demo.css', "pagedown/custom.css",)
