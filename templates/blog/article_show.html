@@ -1,0 +1,53 @@
+{% extends 'blog/base.html' %}
+{% load static %}
+{% load markdown_deux_tags %}
+
+{% block title %}{{ detail.title }}{% endblock %}
+
+{% block head %}
+    <script src="{% static 'js/minifishAjax.js' %}"></script>
+{% endblock %}
+
+{% block body_block %}
+
+
+<div class="well">
+
+    <div class="row">
+        <h3 class="col-sm-11 col-sm-offset-1">{{ detail.title }}</h3>
+        <div class="col-sm-7 col-sm-offset-1">
+            {{ detail.author }} -- {{ detail.modified }}
+        </div>
+        <div class="col-sm-3 col-sm-offset-1">
+            阅<span class="badge badge-success">{{ detail.views }}</span>    赞<span class="badge badge-success" id="like_count">{{ detail.likes }}</span>
+            <button id ="likes" data-catid="{{detail.id}}" class="btn btn-xs btn-success" type="button">Like</button>
+        </div>
+    </div>
+    <hr/>
+    <p>{{ detail.content|markdown }}</p>
+    <hr/>
+    <p>
+    <ul class="list-inline">
+        {% for tag in tags %}
+        <li><i class="glyphicon glyphicon-tag"></i><a href="{% url 'tag_filter' tag.id %}">{{tag}}</a></li>
+        {% endfor %}
+    </ul>
+    <hr/>
+    <ul class="pager">
+        {% if previous_id %}
+            <li class="previous"><a href="../{{detail.id|add:'1'}}">上一篇: {{ previous_id.title }}</a></li>
+        {% else %}
+            <li class="previous"><a href="#">无上篇</a></li>
+        {% endif %}
+
+        {% if next_id %}
+            <li class="next"><a href="../{{detail.id|add:'-1'}}">下一篇: {{ next_id.title }}</a></li>
+        {% else %}
+            <li class="next"><a href="#">无下篇</a></li>
+        {% endif %}
+    </ul>
+</div>
+
+
+
+{% endblock %}

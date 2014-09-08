@@ -1,0 +1,18 @@
+<div class="box">
+    <i class="glyphicon glyphicon-tags"></i> 标签云
+    <ul class="list-inline">
+        {% for base_tag in base_tags %}
+            <li><a class="btn btn-xs btn-info" style="margin:5px 0px 5px 0px" href="{% url 'tag_filter' base_tag.id %}">{{ base_tag }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+<br/>
+<div class="box">
+    <i class="glyphicon glyphicon-fire"></i> 阅读排行
+    {% for v in base_views %}
+        <p >
+            <a href="{% url 'article_show' v.id%}"><h5>{{ v.title }}  <small>{{ v.content|slice:":50" }}</small></h5></a>
+        </p>
+
+    {% endfor %}
+</div>

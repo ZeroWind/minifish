@@ -1,0 +1,36 @@
+{% extends 'blog/base.html' %}
+{% load static %}
+{% load markdown_deux_tags %}
+
+{% block title %}主题{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block body_block %}
+
+    {% for topic in topics.object_list %}
+     <div class="well well-sm">
+        <h3><a href="{{topic.id}}">{{ topic.title }}</a></h3></p>
+        <p>{{ topic.content|slice:":250"|markdown }}</p>
+        <p class="text-right"><a href="{{topic.id}}">更多...</a>    阅<span class="badge badge-success">{{ topic.views }}</span>    赞<span class="badge badge-success" id="like_count">{{ topic.likes }}</span>
+        </p>
+     </div>
+    {% endfor %}
+
+<div class="text-center text-danger">
+  <ul class="pagination">
+
+    {# topics.paginator.page_range  这个函数返回包含一个所有页码数的  range  对象  #}
+    {#  即  range(1, topics.paginator.num_pages + 1) #}
+    {% for page_number in topics.paginator.page_range %}
+      {% ifequal page_number  topics.number %}
+        <li class="disabled"><a href="#">{{ page_number }}</a></li>
+      {% else %}
+        <li><a href="?page={{ page_number }}">{{ page_number }}</a></li>
+      {% endifequal %}
+    {% endfor %}
+
+  </ul>
+</div>
+{% endblock %}

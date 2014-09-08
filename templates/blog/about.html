@@ -1,0 +1,18 @@
+{% extends 'blog/base.html' %}
+{% load static %}
+
+
+{% block title %}About{% endblock %}
+
+{% block body_block %}
+    <div class="box">
+    <h1 class="text-warning">关于</h1><hr><br />
+    <p class="text-primary">This is <strong>GreenFish's about page</strong>.</p>
+    <strong class="text-success">呃...</strong>.<br />
+    <br />
+    <img src="{% static 'img/defaultavatar.png' %}" alt="Picture of BootStrap" class="img-rounded" />
+    <hr>
+    </div>
+
+
+{% endblock %}
