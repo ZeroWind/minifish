@@ -1,17 +1,17 @@
 #coding=utf-8
 from django.shortcuts import render_to_response, get_object_or_404, HttpResponse, RequestContext, HttpResponseRedirect
-from blog.models import Tag, Blog
+from blog.models import Tag, Blog, Anybody, Comments
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from blog.forms import GiveoutForm, TagForm
+from blog.forms import GiveoutForm, TagForm, AnybodyForm, CommentsForm
 from django.contrib.auth.models import User
 from django.db.models import Q
 import json
 
 # mine
 def index(request):
-    ''' Article 阅读排行..等'''
+    ''' Article 阅读排行..等, 临时主页'''
     context = RequestContext(request)
     context_dict ={}
 
@@ -99,6 +99,7 @@ def article_show(request, id='', readviews=1):
     views_count = detail.views + 1    # 阅读数, 未跟cookie绑定
     Blog.objects.filter(pk=id).update(views=views_count)
 
+    # 上下页判断, 临时写法
     try:
         if Blog.objects.get(pk=int(id)+1):
             context_dict['previous_id'] = Blog.objects.get(pk=int(id)+1)
@@ -110,6 +111,12 @@ def article_show(request, id='', readviews=1):
     except:
         context_dict['next_id'] = None
 
+    # 评论
+    comment = comments_add(request, id)
+    context_dict.update(comment)
+
+    # 一堆字典..待整理
+    context_dict['comments_count'] = comments_count(id)
     context_dict['detail'] = detail
     context_dict['tags'] = tags
     context_dict['base_tags'] = get_tags()
@@ -182,6 +189,7 @@ def get_views():
     return base_views
 
 def get_search(request):
+    '''搜索'''
     context = RequestContext(request)
     context_dict = {}
     if 'search' in request.GET:
@@ -246,6 +254,52 @@ def user_logout(request):
     return HttpResponseRedirect(reverse('index'))
 
 
+# Comment Add and Show
+def comments_add(request, id):
+    '''评论'''
+    blog = get_object_or_404(Blog, pk=1)
 
+    if request.method == 'POST':
+        comment_form = CommentsForm(request.POST)
+        anybody_form = AnybodyForm(request.POST)
 
+        if comment_form.is_valid() and anybody_form.is_valid():
+            comt = comment_form.save(commit=False)
+            anyuser = anybody_form.cleaned_data
 
+            try:
+                # 邮箱存在不作记录, 仅更新访客名与站点
+                email = Anybody.objects.get(email=anyuser['email'])
+                if anyuser['website']:
+                    Anybody.objects.filter(email=anyuser['email']).update(anyname=anyuser['anyname'],website=anyuser['website'])
+            except:
+                anybody_form.save()
+                email = Anybody.objects.get(email=anyuser['email'])
+
+            comt.email = email
+            comt.save()
+
+            comt.acticle_id.add(blog) # 麻烦的多对多..莫非还有更好的方法? ...待发现
+            comt.save()
+        else:
+            print 'error!'
+
+    comment_form = CommentsForm()
+    anybody_form = AnybodyForm()
+
+    comments = blog.comments_set.all()
+    for comment in comments:
+        anybody = Anybody.objects.filter(email=comment.email)[0]
+        comment.name = anybody.anyname
+        comment.website = anybody.website
+
+    context_dict = {
+        'comments_all':comments,
+        'comment_form':comment_form,
+        'anybody_form':anybody_form,
+        }
+    return context_dict
+
+def comments_count(id):
+    '''评论数'''
+    return get_object_or_404(Blog,pk=id).comments_set.all().count()

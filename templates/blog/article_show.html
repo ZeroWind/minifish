@@ -4,8 +4,10 @@
 
 {% block title %}{{ detail.title }}{% endblock %}
 
+
 {% block head %}
     <script src="{% static 'js/minifishAjax.js' %}"></script>
+    {{ comment_form.media }}
 {% endblock %}
 
 {% block body_block %}
@@ -14,7 +16,7 @@
 <div class="well">
 
     <div class="row">
-        <h3 class="col-sm-11 col-sm-offset-1">{{ detail.title }}</h3>
+        <h2 class="col-sm-11 col-sm-offset-1">{{ detail.title }}</h2>
         <div class="col-sm-7 col-sm-offset-1">
             {{ detail.author }} -- {{ detail.modified }}
         </div>
@@ -46,8 +48,34 @@
             <li class="next"><a href="#">无下篇</a></li>
         {% endif %}
     </ul>
+    <div>
+        <strong><span class="badge badge-success">{{comments_count}}</span> Comments</strong>
+    </div>
 </div>
 
+<div class="box">
+{% for comt in comments_all %}
+
+    <p><b>{{ comt.name }}</b>   <span>{{ comt.commentstime }}   {{ comt.email }}   {{ comt.website }}</span></p>
+    <p>{{ comt.comments|markdown }}</p>
+<hr/>
+{% endfor %}
+
+    <form class="form-signin" id="comment_form" method="post" action="">
+        {% csrf_token %}
+        {% for field in anybody_form.visible_fields %}
+            {{ field.errors }}
+            <strong>{{ field.label }}</strong>     <small>{{field.help_text}}</small><br/>
+            {{ field }}<br />
+        {% endfor %}
+        {% for field in comment_form.visible_fields %}
+            {{ field.errors }}
+            <strong>{{ field.label }}</strong>     <small>{{field.help_text}}</small><br/>
+            {{ field }}<br />
+        {% endfor %}
+    <button class="btn btn-primary" type="submit" name="submit" />提交</button></p>
+    </form>
+</div>
 
 
 {% endblock %}

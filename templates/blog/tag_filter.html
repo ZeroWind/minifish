@@ -9,32 +9,38 @@
 
 <h2 class="box">搜索结果</h2><br/>
 
-        {% for blog in blogs %}
-        <div class="box">
-            <div class="row-fluid">
-                <div class="col-sm-6">
-                    <h4><a href="{% url 'article_show' blog.id %}">{{ blog.title }}</a></h4>
-                </div>
-                <div class="col-sm-3">
-                    <p class="muted"><i class="glyphicon glyphicon-time"></i><small> {{ blog.modified }}</small></p>
-                </div>
+{% for blog in blogs %}
 
-                <div class="col-sm-2 col-sm-offset-1">
-                {% if user.is_authenticated %}
-                    <a href="#" title="delete"><i class="glyphicon glyphicon-trash"></i></a>
-                    <a href="{% url 'giveout_edit' blog.id %}" title="edit"><i class="glyphicon glyphicon-edit"></i></a>
-                    <a href="#" title="comment"><i class="glyphicon glyphicon-comment"></i></a>
-                {% endif %}
-                </div>
-            </div>
-            <div>
-                <p class="bg-success"><small>{{ blog.content|slice:":300" }}</small></p>
-            </div>
+<div class="box">
+    <div class="row-fluid">
+        <div class="col-sm-12">
+            <h3><a href="{% url 'article_show' blog.id %}">{{ blog.title }}</a></h3>
+
+
+        <div class="col-sm-4">
+            <p class="muted"><i class="glyphicon glyphicon-time"></i><small> {{ blog.modified }}</small></p>
         </div>
-        <br/>
-        {% empty %}
-            <p class="text-info">no result!!</p>
-        {% endfor %}
+
+        <div class="col-sm-4">
+        {% if user.is_authenticated %}
+            <a href="#" title="delete"><i class="glyphicon glyphicon-trash"></i></a>
+            <a href="{% url 'giveout_edit' blog.id %}" title="edit"><i class="glyphicon glyphicon-edit"></i></a>
+            <a href="#" title="comment"><i class="glyphicon glyphicon-comment"></i></a>
+        {% endif %}
+        </div>
+        </div>
+
+    </div>
+
+    <div>
+        <p class="bg-success"><small>{{ blog.content|slice:":300" }}</small></p>
+    </div>
+
+</div>
+<br/>
+{% empty %}
+    <p class="text-info">no result!!</p>
+{% endfor %}
 
 
 {% endblock %}
