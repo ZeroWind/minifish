@@ -116,7 +116,6 @@ def article_show(request, id='', readviews=1):
     context_dict.update(comment)
 
     # 一堆字典..待整理
-    context_dict['comments_count'] = comments_count(id)
     context_dict['detail'] = detail
     context_dict['tags'] = tags
     context_dict['base_tags'] = get_tags()
@@ -287,19 +286,21 @@ def comments_add(request, id):
     comment_form = CommentsForm()
     anybody_form = AnybodyForm()
 
-    comments = blog.comments_set.all()
+    # comments = blog.comments_set.all()
+    comments = get_object_or_404(Blog,pk=id).comments_set.all()
     for comment in comments:
         anybody = Anybody.objects.filter(email=comment.email)[0]
         comment.name = anybody.anyname
         comment.website = anybody.website
 
+    comments_count = comments.count()
+
     context_dict = {
         'comments_all':comments,
         'comment_form':comment_form,
         'anybody_form':anybody_form,
+        'comments_count':comments_count
         }
     return context_dict
 
-def comments_count(id):
-    '''评论数'''
-    return get_object_or_404(Blog,pk=id).comments_set.all().count()
+
