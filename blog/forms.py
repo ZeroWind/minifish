@@ -48,7 +48,7 @@ class CommentsForm(forms.ModelForm):
     comments = forms.CharField(
             label='评论',
             widget=PagedownWidget(show_preview=False, css=("css/demo2.css",)),
-            help_text="限500字, 支持Markdown语法:http://wowubuntu.com/markdown/",
+            help_text="限500字",
         )
     class Meta:
         model = Comments

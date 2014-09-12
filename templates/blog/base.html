@@ -11,7 +11,7 @@
 
         <style>
             .navbar {
-                background-color: rgba( 255, 255, 255, 0.7);
+                background-color: rgba( 255, 255, 255, 0.9);
                 background-image: none;
             }
             .well { padding:20px;
@@ -86,7 +86,7 @@
 
                             <ul class="nav navbar-nav navbar-right">
                                 <li>
-                                  <form class="navbar-form navbar-right" id="srarch_form" method="get" role="search" action="{% url 'get_search' %}">
+                                  <form class="navbar-form" id="srarch_form" method="get" role="search" action="{% url 'get_search' %}">
                                     <div class="form-group">
                                       <input type="text" class="form-control" placeholder="Search" name="search">
                                     </div>
@@ -109,9 +109,10 @@
 <!-- 页面内容 -->
 
     <div class="container ">
-        <div class="blog-header col-sm-offset-1">
-            <h1 class="blog-title" style="color:white;text-shadow: 5px 5px 5px #888888;">GreenFish の Blog</h1>
-            <p class="lead blog-description" style="color:silver;text-shadow: 5px 5px 5px #888888;">不要让梦想, 只是梦想而已</p>
+        <div class="blog-header  col-sm-offset-8">
+            <h1 class="blog-title text-right" style="color:white;text-shadow: 5px 5px 5px #888888;"><b>GreenFish ★ Blog</b></h1>
+            <hr class="col-sm-offset-2"/>
+            <p class="lead blog-description text-right" style="color:white;text-shadow: 5px 5px 5px #888888;">不要让梦想, 只是梦想而已</p>
         </div>
 
         <div class="row-fluid">

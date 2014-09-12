@@ -45,7 +45,7 @@ class Comments(models.Model):
     updatetime = models.DateTimeField('更新日期', auto_now=True)
 
     class Meta:
-        ordering = ['-commentstime']
+        ordering = ['commentstime']
 
     def __unicode__(self):
         return self.comments

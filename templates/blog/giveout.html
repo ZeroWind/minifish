@@ -6,6 +6,11 @@
 
 {% block head %}
     {{ giveout_form.media }}
+    <script>
+        $(function() {
+            $("textarea").addClass(" form-control");
+        });
+    </script>
 {% endblock %}
 
 {% block body_block %}

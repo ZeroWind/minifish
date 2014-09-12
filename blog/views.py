@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 from blog.forms import GiveoutForm, TagForm, AnybodyForm, CommentsForm
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.template.loader import get_template
 import json
 
 # mine
@@ -111,16 +112,19 @@ def article_show(request, id='', readviews=1):
     except:
         context_dict['next_id'] = None
 
-    # 评论
-    comment = comments_add(request, id)
-    context_dict.update(comment)
-
     # 一堆字典..待整理
     context_dict['detail'] = detail
     context_dict['tags'] = tags
     context_dict['base_tags'] = get_tags()
     context_dict['base_views'] = get_views()
-    return render_to_response('blog/article_show.html', context_dict, context)
+
+    # 评论
+    comment = comments_add(request, id)
+    context_dict.update(comment)
+    if context_dict['redirect_post'] == True:
+        return HttpResponseRedirect('/articles/%s' % id)
+    else:
+        return render_to_response('blog/article_show.html', context_dict, context)
 
 
 def article_list(request):
@@ -256,11 +260,12 @@ def user_logout(request):
 # Comment Add and Show
 def comments_add(request, id):
     '''评论'''
-    blog = get_object_or_404(Blog, pk=1)
+    blog = get_object_or_404(Blog, pk=id)
 
     if request.method == 'POST':
         comment_form = CommentsForm(request.POST)
         anybody_form = AnybodyForm(request.POST)
+        redirect_post = True
 
         if comment_form.is_valid() and anybody_form.is_valid():
             comt = comment_form.save(commit=False)
@@ -283,11 +288,13 @@ def comments_add(request, id):
         else:
             print 'error!'
 
+    else:
+        redirect_post = False
+
     comment_form = CommentsForm()
     anybody_form = AnybodyForm()
 
-    # comments = blog.comments_set.all()
-    comments = get_object_or_404(Blog,pk=id).comments_set.all()
+    comments = blog.comments_set.all()
     for comment in comments:
         anybody = Anybody.objects.filter(email=comment.email)[0]
         comment.name = anybody.anyname
@@ -299,7 +306,8 @@ def comments_add(request, id):
         'comments_all':comments,
         'comment_form':comment_form,
         'anybody_form':anybody_form,
-        'comments_count':comments_count
+        'comments_count':comments_count,
+        'redirect_post':redirect_post
         }
     return context_dict
 
