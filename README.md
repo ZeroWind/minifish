@@ -1,14 +1,18 @@
 #My Blog project
 
-*看完<<The Django Book>>, 阅读了N篇博文后的第一个原创作品*
-*基本完成, 剩下细节部分...*
+*第一个原创作品*
+
+*基本完成, 剩下细节慢慢调整...*
+
+[MiniFishBlog][1]
+    [1]: http://minifish.pythonanywhere.com	"MiniFish"
 
 ###当前实现
 
 1. 登录 & 注销
 2. 文章发布 & 编辑, 使用 pagedown & markdown_deux, 由Django中国社区推荐
 3. 文章列表 & 分页 
-4. 标签云 
+4. 标签云
 5. Bootstrap 3 
 6. 加入评论 & 点赞按钮, AJAX支持, 自己写 commentapp, 未使用 Django 自带的
 7. 简单的 Blog 管理, 删除博文,评论,标签清理等
@@ -19,5 +23,6 @@
 2. 新浪微接入 API
 3. 图片库 & 文件上传
 4. 验证码
-
+5. 访客行为跟踪 Session ..
+ 
 ###参考
