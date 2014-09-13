@@ -4,8 +4,7 @@
 
 *基本完成, 剩下细节慢慢调整...*
 
-[MiniFishBlog][1]
-    [1]: http://minifish.pythonanywhere.com	"MiniFish"
+MiniFish Blog (o_O) >>> http://minifish.pythonanywhere.com
 
 ###当前实现
 
