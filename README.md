@@ -1,12 +1,12 @@
 #My Blog project
 
-*看完<<The Django Book>>教程, 阅读了无数博文后的第一个原创作品*
+*看完<<The Django Book>>, 阅读了N篇博文后的第一个原创作品*
 *基本完成, 剩下细节部分...*
 
 ###当前实现
 
 1. 登录 & 注销
-2. 文章发布 & 编辑, 使用 pagedown & markdown_deux
+2. 文章发布 & 编辑, 使用 pagedown & markdown_deux, 由Django中国社区推荐
 3. 文章列表 & 分页 
 4. 标签云 
 5. Bootstrap 3 
@@ -20,3 +20,4 @@
 3. 图片库 & 文件上传
 4. 验证码
 
+###参考
