@@ -61,11 +61,9 @@ def giveout(request, id=''):
             for t in tags['tag_name']:
                 blog.tags.add(Tag.objects.get(tag_name=t))
             blog.save()
-
+            return HttpResponseRedirect(reverse('index'))
         else:
             print tags_form.errors, giveout_form.errors
-        return HttpResponseRedirect(reverse('index'))
-
     else:
         if id:
             # 编辑
@@ -97,7 +95,7 @@ def article_show(request, id='', readviews=1):
     tags = detail.tags.all()
 
     views_count = 0
-    views_count = detail.views + 1    # 阅读数, 未跟cookie绑定
+    views_count = detail.views + 1    # 阅读数, 暂未跟cookie绑定
     Blog.objects.filter(pk=id).update(views=views_count)
 
     # 上下页判断, 临时写法
@@ -112,7 +110,7 @@ def article_show(request, id='', readviews=1):
     except:
         context_dict['next_id'] = None
 
-    # 一堆字典..待整理
+    context_dict['cmt_id'] = id
     context_dict['detail'] = detail
     context_dict['tags'] = tags
     context_dict['base_tags'] = get_tags()
@@ -121,10 +119,8 @@ def article_show(request, id='', readviews=1):
     # 评论
     comment = comments_add(request, id)
     context_dict.update(comment)
-    if context_dict['redirect_post'] == True:
-        return HttpResponseRedirect('/articles/%s' % id)
-    else:
-        return render_to_response('blog/article_show.html', context_dict, context)
+
+    return render_to_response('blog/article_show.html', context_dict, context)
 
 
 def article_list(request):
@@ -265,17 +261,20 @@ def comments_add(request, id):
     if request.method == 'POST':
         comment_form = CommentsForm(request.POST)
         anybody_form = AnybodyForm(request.POST)
-        redirect_post = True
 
         if comment_form.is_valid() and anybody_form.is_valid():
             comt = comment_form.save(commit=False)
             anyuser = anybody_form.cleaned_data
 
             try:
-                # 邮箱存在不作记录, 仅更新访客名与站点
+                # 邮箱存在则不作记录, 仅更新访客名与站点
                 email = Anybody.objects.get(email=anyuser['email'])
+                print anyuser['website']
                 if anyuser['website']:
-                    Anybody.objects.filter(email=anyuser['email']).update(anyname=anyuser['anyname'],website=anyuser['website'])
+                    Anybody.objects.filter(email=anyuser['email']).update(
+                                                                    anyname=anyuser['anyname'],
+                                                                    website=anyuser['website']
+                                                                    )
             except:
                 anybody_form.save()
                 email = Anybody.objects.get(email=anyuser['email'])
@@ -283,22 +282,21 @@ def comments_add(request, id):
             comt.email = email
             comt.save()
 
-            comt.acticle_id.add(blog) # 麻烦的多对多..莫非还有更好的方法? ...待发现
+            comt.acticle_id.add(blog)
             comt.save()
+
         else:
-            print 'error!'
+            print 'error!', comment_form.errors, anybody_form.errors
 
     else:
-        redirect_post = False
-
-    comment_form = CommentsForm()
-    anybody_form = AnybodyForm()
+        comment_form = CommentsForm()
+        anybody_form = AnybodyForm()
 
     comments = blog.comments_set.all()
-    for comment in comments:
-        anybody = Anybody.objects.filter(email=comment.email)[0]
-        comment.name = anybody.anyname
-        comment.website = anybody.website
+    for cmt in comments:
+        anybody = Anybody.objects.filter(email=cmt.email)[0]
+        cmt.name = anybody.anyname
+        cmt.website = anybody.website
 
     comments_count = comments.count()
 
@@ -307,8 +305,40 @@ def comments_add(request, id):
         'comment_form':comment_form,
         'anybody_form':anybody_form,
         'comments_count':comments_count,
-        'redirect_post':redirect_post
         }
     return context_dict
+
+
+def comment_show(request, cmt_id):
+    '''评论AJAX支持'''
+    context_dict = {}
+    cmt = comments_add(request, cmt_id)
+    context_dict.update(cmt)
+
+    if request.is_ajax():
+        t = get_template('blog/comment_show.html')
+        comment_html = RequestContext(request, context_dict)
+    return HttpResponse(t.render(comment_html))
+
+@login_required()
+def del_control(request, delconf='', id=''):
+    '''Delete Comment & Article'''
+    if delconf=='cmt':
+        cmt = get_object_or_404(Comments, pk=id)
+        tid = cmt.acticle_id.all()[0].pk
+        cmt.acticle_id.clear()
+        cmt.delete()
+        return HttpResponseRedirect('/articles/%s'%tid)
+
+    elif delconf=='article':
+        article = get_object_or_404(Blog, id=id)
+        tags = article.tags.all()
+        for tag in tags:
+            tag_clear = tag.blog_set.all().count()
+            if tag_clear <= 1:
+                tag.delete()    # 清理标签
+        article.tags.clear()    # 清理文章关系&删除文章
+        article.delete()
+        return HttpResponseRedirect('/articles/')
 
 

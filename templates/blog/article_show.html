@@ -8,41 +8,68 @@
 {% block head %}
     <script src="{% static 'js/minifishAjax.js' %}"></script>
     {{ comment_form.media }}
+
     <script>
-        $(function() {
-            $("textarea").addClass(" form-control");
-            $("#comment_form input").addClass(" form-control").css({
-                width:"50%",
+        function bindPostCommentHandler() {
+            $('#comment_form').submit(function() {
+                $.ajax({
+                    type: "POST",
+                    data: $('#comment_form').serialize(),
+                    url: "{% url 'comment_show' cmt_id %}",
+                    cache: false,
+                    dataType: "html",
+                    success: function(html, textStatus) {
+                        $('#cmt').replaceWith(html);
+                        $('#comment_form')[0].reset();
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        $('#comment_form')[0].reset()
+                        $('#comment_errors').replaceWith('<div class="alert alert-danger" role="alert">您的评论暂时无法提交, 请检查相关字段是否填写正确.</div>');
+                    }
+                });
+                return false;
             });
-        });
+        }
     </script>
 {% endblock %}
 
 {% block body_block %}
 
 
-<div class="box">
+<div class="row-fluid box">
+    <div class="col-sm-12">
+        <h2>{{ detail.title }} <button id ="likes" data-catid="{{detail.id}}" class="btn btn-xs btn-success" type="button">Like</button></h2>
 
-    <div class="row">
-        <h2 class="col-sm-12 col-sm-offset-1">{{ detail.title }}</h2>
-        <div class="col-sm-7 col-sm-offset-1">
-            {{ detail.author }} -- {{ detail.modified }}
-        </div>
-        <div class="col-sm-3 col-sm-offset-1">
-            阅<span class="badge badge-success">{{ detail.views }}</span>    赞<span class="badge badge-success" id="like_count">{{ detail.likes }}</span>
-            <button id ="likes" data-catid="{{detail.id}}" class="btn btn-xs btn-success" type="button">Like</button>
-        </div>
     </div>
-    <hr/>
-    <p>{{ detail.content|markdown }}</p>
-    <hr/>
-    <p>
-    <ul class="list-inline">
-        {% for tag in tags %}
-        <li><i class="glyphicon glyphicon-tag"></i><a href="{% url 'tag_filter' tag.id %}">{{tag}}</a></li>
-        {% endfor %}
-    </ul>
-    <hr/>
+
+    <div class="col-sm-8">
+        <strong><i class="glyphicon glyphicon-user"></i> {{ detail.author }}</strong>
+        <i class="glyphicon glyphicon-time"></i> {{ detail.modified|date:"H:i Y-m-d" }}
+    </div>
+    <div class="col-sm-4 text-right">
+        <span class="badge badge-success">阅 {{ detail.views }}</span>    <span class="badge badge-success">赞 <b id="like_count">{{ detail.likes }}</b></span>
+
+    </div>
+
+    <div class="col-sm-12">
+        <hr/>
+    </div>
+
+    <div class="col-sm-12">
+        {{ detail.content|markdown }}
+    </div>
+
+    <div class="col-sm-12">
+        <hr/>
+    </div>
+
+    <div class="col-sm-12">
+        <ul class="list-inline">
+            {% for tag in tags %}
+            <li><i class="glyphicon glyphicon-tag"></i><a href="{% url 'tag_filter' tag.id %}">{{tag}}</a></li>
+            {% endfor %}
+        </ul>
+
     <ul class="pager">
         {% if previous_id %}
             <li class="previous"><a href="../{{detail.id|add:'1'}}">上一篇: {{ previous_id.title }}</a></li>
@@ -56,21 +83,43 @@
             <li class="next"><a href="#">无下篇</a></li>
         {% endif %}
     </ul>
-
+    </div>
 </div>
 <br/>
+
 <div class="box">
+<div id="cmt">
     <div>
         <strong><h3>{{comments_count}} Comments</h3></strong>
         <hr/>
     </div>
-{% for comt in comments_all %}
+    {% for comt in comments_all %}
+    <div class="row-fluid">
+        <div class="col-sm-11">
+        <strong><i class="glyphicon glyphicon-user"></i> {{ comt.name }}</strong>
+        <i class="glyphicon glyphicon-comment"></i> {{  forloop.counter }}楼
+        <span>
+            <i class="glyphicon glyphicon-time"></i> {{ comt.commentstime|date:"H:i Y-m-d" }}
+            <a href="{{ comt.email }}"><i class="glyphicon glyphicon-envelope"></i></a>
+            <a href="{{ comt.website }}"><i class="glyphicon glyphicon-home"></i></a>
+        </span>
+        </div>
+        <div class="col-sm-1">
+            {% if user.is_authenticated %}
+                <a href="{% url 'del_comment' comt.id %}" title="delete"><i class="glyphicon glyphicon-trash"></i></a>
+            {% endif %}
+        </div>
 
-    <p>{{  forloop.counter }}楼 <b>{{ comt.name }}</b>   <span>{{ comt.commentstime|date:"f,F,j,Y" }}   {{ comt.email }}   {{ comt.website }}</span></p>
-    <p>{{ comt.comments|markdown }}</p>
-<hr/>
-{% endfor %}
-</div><br/>
+    <div class="col-sm-12">
+        <p>{{ comt.comments|markdown }}</p>
+        <hr />
+    </div>
+    </div>
+    {% endfor %}
+    </div>
+</div>
+
+<br/>
 <div class="box">
         <form class="form-signin" id="comment_form" method="post" action="">
             {% csrf_token %}
@@ -84,11 +133,15 @@
                 <strong>{{ field.label }}</strong>     <small>{{field.help_text}}</small><br/>
                 {{ field }}<br />
             {% endfor %}
+        <input type='hidden' name='next' value="{% url 'comment_show' cmt_id %}"/>
         <button class="btn btn-primary" type="submit" name="submit" />提交</button></p>
         </form>
+
         <ul>
             <li><span>支持Markdown语法:<a href="http://wowubuntu.com/markdown/">语法说明</a></span></li>
+            <li><span>请勿发布与主题无关的评论</span></li>
         </ul>
+        <div id="comment_errors"></div>
 
 
 </div>

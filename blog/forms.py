@@ -32,7 +32,7 @@ class GiveoutForm(forms.Form):
     #     raise forms.ValidationError("User Name has been taken!")
 
 class TagForm(forms.ModelForm):
-    tag_name = forms.CharField(label='标签组', help_text="用逗号或空格分隔标签", widget=forms.TextInput(attrs={'class':'form-control'}))
+    tag_name = forms.CharField(label='标签组', help_text="用逗号或空格分隔标签", widget=forms.TextInput(attrs={'class':'form-control'}), required=True)
 
     class Meta:
         model = Tag
@@ -49,6 +49,7 @@ class CommentsForm(forms.ModelForm):
             label='评论',
             widget=PagedownWidget(show_preview=False, css=("css/demo2.css",)),
             help_text="限500字",
+            required=True,
         )
     class Meta:
         model = Comments

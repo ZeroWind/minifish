@@ -5,24 +5,29 @@ from django.views.generic import FormView
 from django.conf.urls import patterns, url
 
 
-urlpatterns = patterns('',
-    url(r'^$', 'blog.views.index'),
-    url(r'^index/$', 'blog.views.index', name = 'index'),
-    url(r'^about/$', 'blog.views.about', name = 'about'),
+urlpatterns = patterns('blog.views',
+    url(r'^$', 'index'),
+    url(r'^index/$', 'index', name = 'index'),
+    url(r'^about/$', 'about', name = 'about'),
 
-    url(r'^giveout/$', 'blog.views.giveout', name = 'giveout'),
-    url(r'^giveout/(?P<id>\d+)/$', 'blog.views.giveout', name = 'giveout_edit'),
-    url(r'^articles/$', 'blog.views.article_list', name = 'article_list'),
-    url(r'^articles/(?P<id>\d+)/$', 'blog.views.article_show', name = 'article_show'),
+    url(r'^giveout/$', 'giveout', name = 'giveout'),
+    url(r'^giveout/(?P<id>\d+)/$', 'giveout', name = 'giveout_edit'),
+    url(r'^articles/$', 'article_list', name = 'article_list'),
+    url(r'^articles/(?P<id>\d+)/$', 'article_show', name = 'article_show'),
 
-    # srarch
-    url(r'^tag_filter/(?P<id>\d+)/$', 'blog.views.tag_filter', name = 'tag_filter'),
-    url(r'^get_search/$', 'blog.views.get_search', name = 'get_search'),
+    url(r'^login/$', 'user_login', name='user_login'),
+    url(r'^logout/$', 'user_logout', name='user_logout'),
 
-    url(r'^login/$', 'blog.views.user_login', name='user_login'),
-    url(r'^logout/$', 'blog.views.user_logout', name='user_logout'),
+    # Search
+    url(r'^tag_filter/(?P<id>\d+)/$', 'tag_filter', name = 'tag_filter'),
+    url(r'^get_search/$', 'get_search', name = 'get_search'),
 
-    #AJAX
-    url(r'^like_article/$', 'blog.views.like_article', name='like_article'),
+    # AJAX
+    url(r'^like_article/$', 'like_article', name='like_article'),
+    url(r'^comment_show/(?P<cmt_id>\d+)/$', 'comment_show', name='comment_show'),
+
+    # Delete
+    url(r'^del_article/(?P<id>\d+)/$', 'del_control', kwargs={'delconf':'article'}, name='del_article'),
+    url(r'^del_comment/(?P<id>\d+)/$', 'del_control', kwargs={'delconf':'cmt'}, name='del_comment'),
 )
 

@@ -5,14 +5,26 @@
 {% block title %}About{% endblock %}
 
 {% block body_block %}
-    <div class="box">
-    <h1 class="text-warning">关于</h1><hr><br />
-    <p class="text-primary">This is <strong>GreenFish's about page</strong>.</p>
-    <strong class="text-success">呃...</strong>.<br />
-    <br />
-    <img src="{% static 'img/defaultavatar.png' %}" alt="Picture of BootStrap" class="img-rounded" />
-    <hr>
+<div class="row-fluid box">
+    <div class="col-sm-12">
+        <h1 class="text-warning">About Me</h1>
+        <hr>
+        <br />
     </div>
+
+    <div class="col-sm-12">
+        <p class="text-primary">This is <strong>GreenFish's about page.</strong></p>
+        <strong class="text-success">呃...</strong>
+        <br />
+    </div>
+
+    <div class="col-sm-12">
+        <br />
+        <img src="{% static 'img/defaultavatar.png' %}" alt="Picture of BootStrap" class="img-rounded" />
+        <hr/>
+    </div>
+
+</div>
 
 
 {% endblock %}

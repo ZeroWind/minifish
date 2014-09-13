@@ -5,15 +5,22 @@
 {% block title %}首页{% endblock %}
 
 {% block body_block %}
-<div class="box">
+<div class="row-fluid box">
+<div class="col-sm-12">
     <h2>阅读排行</h2>
     <hr/>
+</div>
+
+<div class="col-sm-12">
     <dl>
     {% for t in title_list %}
-      <dt><a href="{% url 'article_show' t.id%}"><h5>{{ t.title }}</h5></a></dt>
-      <dd><small>{{ t.content|slice:":100" }}</small></dd>
+      <dt><a href="{% url 'article_show' t.id%}"><h4>{{ t.title }}</h4></a></dt>
+      <dd><small>{{ t.content|slice:":300" }}</small></dd>
     {% endfor %}
     </dl>
+</div>
+
+
 </div>
 
 
