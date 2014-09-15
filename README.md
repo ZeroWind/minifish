@@ -1,24 +1,28 @@
 #My Blog project
 
-*第一个作品*
+*第一个 Django 项目*
 
-*基本完成, 剩下细节慢慢调整...*
+*基本功能完成, 剩下细节慢慢调整...*
 
-已部署 MiniFish Blog (o_O) >>> http://minifish.pythonanywhere.com
+*已部署 MiniFish Blog (o_O) Demo >>> http://minifish.pythonanywhere.com*
 
 ###当前实现
 
 1. 登录 & 注销
 2. 文章发布 & 编辑, 使用 pagedown & markdown_deux 
-3. 文章列表 & 分页 
-4. 标签云
-5. Bootstrap 3 
-6. 加入评论 & 点赞按钮, AJAX支持, 自己码评论, 未使用 Django 自带库
-7. 简单的 Blog 管理, 删除博文及评论, 标签清理等
+3. 文章列表, 分页, 标签云
+4. Bootstrap 3 
+5. 加入评论 & 点赞按钮, AJAX支持, 自己码评论, 未使用 Django 自带库
+6. 简单的 Blog 管理, 删除博文及评论, 标签清理等
 
 ###待实现
 
 评论楼中楼, 新浪微接入 API, 图片库 & 文件上传, 验证码, 访客行为跟踪 Session ..
+
+###BUG:
+
+bug#1描述: 评论表单[提交]请求后, 返回的响应被 AJAX 接收, 导致后端的表单数据验证提示无法渲染到页面 
+bug#1解决思路: 加入 AJAX前端验证, 恶补相关知识中...
  
 ###参考
 
