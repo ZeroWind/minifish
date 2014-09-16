@@ -7,6 +7,7 @@ $(document).ready(function() {
             $('#like_count').html(data);
             $('#likes').hide();
         });
+        $("#showlike").html('<button class="btn btn-xs btn-success" type="button" disabled="disabled">已赞</button>');
     });
 
     $("textarea").addClass(" form-control");

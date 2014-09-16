@@ -38,7 +38,15 @@
 
 <div class="row-fluid box">
     <div class="col-sm-12">
-        <h2>{{ detail.title }} <button id ="likes" data-catid="{{detail.id}}" class="btn btn-xs btn-success" type="button">Like</button></h2>
+        <h2>{{ detail.title }}
+        <span id="showlike">
+            {% if likes %}
+                <button class="btn btn-xs btn-success" type="button" disabled="disabled">已赞</button>
+            {% else %}
+                <button id ="likes" data-catid="{{detail.id}}" class="btn btn-xs btn-success" type="button">赞</button>
+            {% endif %}
+        </span>
+        </h2>
 
     </div>
 

@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from django.template.loader import get_template
 import json
+from datetime import datetime
 
 # mine
 def index(request):
@@ -94,11 +95,18 @@ def article_show(request, id='', readviews=1):
     detail = get_object_or_404(Blog, pk=id)
     tags = detail.tags.all()
 
+    # sessions, 跟踪赞与阅读次数
     views_count = 0
-    views_count = detail.views + 1    # 阅读数, 暂未跟cookie绑定
-    Blog.objects.filter(pk=id).update(views=views_count)
+    views = 'views_'+id
+    if not request.session.get(views):
+        request.session[views] = True
+        views_count = detail.views + 1
+        Blog.objects.filter(pk=id).update(views=views_count)
 
-    # 上下页判断, 临时写法
+    if request.session.get('likes_'+id):
+        context_dict['likes'] = True
+
+    # 上下页判断
     try:
         if Blog.objects.get(pk=int(id)+1):
             context_dict['previous_id'] = Blog.objects.get(pk=int(id)+1)
@@ -157,12 +165,18 @@ def like_article(request):
     if request.method == 'GET':
         cat_id = request.GET['article_id']
     likes = 0
-    if cat_id:
-        articlelike = Blog.objects.get(id=int(cat_id))
-        if articlelike:
-            likes = articlelike.likes +1
-            articlelike.likes = likes
-            articlelike.save()
+
+    if request.session.get('likes') and request.session.get('like_id'):
+        likes = Blog.objects.get(id=int(cat_id))
+    else:
+        if cat_id:
+            articlelike = Blog.objects.get(id=int(cat_id))
+            if articlelike:
+                likes = articlelike.likes +1
+                articlelike.likes = likes
+                articlelike.save()
+        request.session['likes_'+cat_id] = True
+
     return HttpResponse(likes)
 
 def tag_filter(request, id=''):

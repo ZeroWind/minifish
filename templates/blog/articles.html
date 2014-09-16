@@ -12,11 +12,22 @@
     {% for topic in topics.object_list %}
   <div class="row-fluid box">
     <div class="col-sm-12">
-      <h3><a href="{{topic.id}}">{{ topic.title }}</a></h3>
-      <hr />
-      <p>{{ topic.content|slice:":300"|markdown }}</p>
-      <p class="text-right"><a href="{{topic.id}}">更多...</a>   <span class="badge badge-success">阅 {{ topic.views }}</span>    <span class="badge badge-success">赞 <b id="like_count">{{ topic.likes }}</b></span>
+      <h2><a href="{{topic.id}}">{{ topic.title }}</a></h2>
+    </div>
+
+    <div class="col-sm-12">
+      <i class="glyphicon glyphicon-time"></i> {{ topic.modified|date:"H:i Y-m-d" }}
+    </div>
+    <div class="col-sm-12">
+      <hr/>
+    </div>
+    <div class="col-sm-12">
+       {{ topic.content|slice:":256"|markdown }}
+      <hr/>
+      <p class="text-right"><a href="{{topic.id}}">更多...</a>
+         <span class="badge badge-success">阅 {{ topic.views }}</span>    <span class="badge badge-success">赞 <b id="like_count">{{ topic.likes }}</b></span>
       </p>
+
     </div>
   </div><br/>
     {% endfor %}
