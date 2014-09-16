@@ -1,0 +1,32 @@
+{% load static %}
+{% load markdown_deux_tags %}
+<div id="cmt">
+    <div>
+        <strong><h3>{{comments_count}} Comments</h3></strong>
+        <hr/>
+    </div>
+    {% for comt in comments_all %}
+    <div class="row-fluid">
+        <div class="col-sm-11">
+        <strong><i class="glyphicon glyphicon-user"></i> {{ comt.name }}</strong>
+        <i class="glyphicon glyphicon-comment"></i> {{  forloop.counter }}楼
+        <span>
+            <i class="glyphicon glyphicon-time"></i> {{ comt.commentstime|date:"H:i Y-m-d" }}
+            <a href="{{ comt.email }}"><i class="glyphicon glyphicon-envelope"></i></a>
+            <a href="{{ comt.website }}"><i class="glyphicon glyphicon-home"></i></a>
+        </span>
+        </div>
+        <div class="col-sm-1">
+            {% if user.is_authenticated %}
+                <a href="{% url 'del_comment' comt.id %}" title="delete"><i class="glyphicon glyphicon-trash"></i></a>
+            {% endif %}
+        </div>
+
+    <div class="col-sm-12">
+        <p>{{ comt.comments|markdown }}</p>
+        <hr />
+    </div>
+    </div>
+    {% endfor %}
+    </div>
+</div>
