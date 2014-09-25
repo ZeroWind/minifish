@@ -111,13 +111,13 @@
 
     <ul class="pager">
         {% if previous_id %}
-            <li class="previous"><a href="../{{detail.id|add:'1'}}">上一篇: {{ previous_id.title }}</a></li>
+            <li class="previous"><a href="{% url 'article_show' detail.id|add:'1' %}">上一篇: {{ previous_id.title }}</a></li>
         {% else %}
             <li class="previous"><a href="#">无上篇</a></li>
         {% endif %}
 
         {% if next_id %}
-            <li class="next"><a href="../{{detail.id|add:'-1'}}">下一篇: {{ next_id.title }}</a></li>
+            <li class="next"><a href="{% url 'article_show' detail.id|add:'-1' %}">下一篇: {{ next_id.title }}</a></li>
         {% else %}
             <li class="next"><a href="#">无下篇</a></li>
         {% endif %}
