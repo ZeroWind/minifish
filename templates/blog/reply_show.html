@@ -1,0 +1,8 @@
+{% load static %}
+{% load markdown_deux_tags %}
+<p id="talk-{{ reply_id }}">
+    <strong>{{ reply_text }}</strong> -
+    <em>{{ reply_user }}</em> -
+    <span>{{ reply_time }}</span> -
+    <a id='delete-post-{{ reply_pk }}'>delete me</a>
+</p>

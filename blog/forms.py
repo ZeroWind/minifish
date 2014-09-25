@@ -18,11 +18,6 @@ class GiveoutForm(forms.Form):
     views = forms.IntegerField(widget=forms.HiddenInput(), initial=0)   # 封装一组隐藏输入元素
     likes = forms.IntegerField(widget=forms.HiddenInput(), initial=0)
 
-    ## 取消关联
-    # class Meta:
-    #     model = Blog
-    #     fields = ('title','content','views', 'likes')
-
     # def clean_username(self):
     #     username = self.cleaned_data['username']
     #     try:

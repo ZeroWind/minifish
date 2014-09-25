@@ -9,6 +9,27 @@ class Tag(models.Model):
     def __unicode__(self):
         return self.tag_name
 
+class Anybody(models.Model):
+    anyname = models.CharField('访客', max_length=64)
+    email = models.EmailField('Email')
+    website = models.CharField('站点', max_length=258, blank=True, null=True)
+    createtime = models.DateTimeField('用户创建日期', auto_now_add=True)
+    updatetime = models.DateTimeField('更新日期', auto_now=True)
+
+    def __unicode__(self):
+        return self.email
+
+class Replytocomt(models.Model):
+    replyuser = models.ForeignKey(Anybody)
+    replytext = models.CharField('评论楼中楼', max_length=258)
+    createtime = models.DateTimeField('评论日期', auto_now_add=True)
+
+    class Meta:
+        ordering = ['createtime']
+
+    def __unicode__(self):
+        return self.replytext
+
 class Blog(models.Model):
     title = models.CharField('文章标题', max_length=128)
     author = models.ForeignKey(User)
@@ -25,24 +46,14 @@ class Blog(models.Model):
     def __unicode__(self):
         return self.title
 
-
-
-class Anybody(models.Model):
-    anyname = models.CharField('访客', max_length=64)
-    email = models.EmailField('Email')
-    website = models.CharField('站点', max_length=258, blank=True, null=True)
-    createtime = models.DateTimeField('用户创建日期', auto_now_add=True)
-    updatetime = models.DateTimeField('更新日期', auto_now=True)
-
-    def __unicode__(self):
-        return self.email
-
 class Comments(models.Model):
     acticle_id = models.ManyToManyField(Blog)
     email = models.ForeignKey(Anybody)
     comments = models.TextField('评论', max_length=500)
     commentstime = models.DateTimeField('评论日期', auto_now_add=True)
     updatetime = models.DateTimeField('更新日期', auto_now=True)
+    # 楼中楼
+    replyid = models.ManyToManyField(Replytocomt)
 
     class Meta:
         ordering = ['commentstime']

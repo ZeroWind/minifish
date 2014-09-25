@@ -1,6 +1,6 @@
 #coding=utf-8
-from django.shortcuts import render_to_response, get_object_or_404, HttpResponse, RequestContext, HttpResponseRedirect
-from blog.models import Tag, Blog, Anybody, Comments
+from django.shortcuts import render_to_response, get_object_or_404, HttpResponse, RequestContext, HttpResponseRedirect, render
+from blog.models import *
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
@@ -28,7 +28,7 @@ def index(request):
 
 @login_required()
 def giveout(request, id=''):
-    ''' 意为竭力发表 or 编辑 '''
+    ''' 发表 or 编辑 '''
     context = RequestContext(request)
 
     if request.method == "POST":
@@ -87,7 +87,7 @@ def giveout(request, id=''):
     return render_to_response('blog/giveout.html', context_dict, context)
 
 
-def article_show(request, id='', readviews=1):
+def article_show(request, id=''):
     ''' Article detail Show'''
     context = RequestContext(request)
     context_dict = {}
@@ -106,6 +106,10 @@ def article_show(request, id='', readviews=1):
     if request.session.get('likes_'+id):
         context_dict['likes'] = True
 
+    if request.session.get('reply_email'):
+        context_dict['reply_user'] = request.session.get('reply_user')
+        context_dict['reply_email'] = request.session.get('reply_email')
+
     # 上下页判断
     try:
         if Blog.objects.get(pk=int(id)+1):
@@ -118,7 +122,8 @@ def article_show(request, id='', readviews=1):
     except:
         context_dict['next_id'] = None
 
-    context_dict['cmt_id'] = id
+    # 页面数据
+    context_dict['tid'] = id
     context_dict['detail'] = detail
     context_dict['tags'] = tags
     context_dict['base_tags'] = get_tags()
@@ -253,7 +258,7 @@ def user_login(request):
                 context_dict['disabled_account'] = True
                 return render_to_response('blog/login.html', context_dict, context)
         else:
-            print "Invalid login details: {0}, {1}".format(username, password)
+            # print "Invalid login details: {0}, {1}".format(username, password)
 
             context_dict['bad_details'] = True
             return render_to_response('blog/login.html', context_dict, context)
@@ -270,9 +275,10 @@ def user_logout(request):
 # Comment Add and Show
 def comments_add(request, id):
     '''评论'''
+    context_dict = {}
     blog = get_object_or_404(Blog, pk=id)
 
-    if request.method == 'POST':
+    if request.method == 'POST' and request.is_ajax():
         comment_form = CommentsForm(request.POST)
         anybody_form = AnybodyForm(request.POST)
 
@@ -283,7 +289,6 @@ def comments_add(request, id):
             try:
                 # 邮箱存在则不作记录, 仅更新访客名与站点
                 email = Anybody.objects.get(email=anyuser['email'])
-                print anyuser['website']
                 if anyuser['website']:
                     Anybody.objects.filter(email=anyuser['email']).update(
                                                                     anyname=anyuser['anyname'],
@@ -299,8 +304,13 @@ def comments_add(request, id):
             comt.acticle_id.add(blog)
             comt.save()
 
+            # 访客信息存入会话, 用于楼中楼
+            request.session['reply_user'] = anyuser['anyname']
+            request.session['reply_email'] = anyuser['email']
+
         else:
-            print 'error!', comment_form.errors, anybody_form.errors
+            # print 'error!', comment_form.errors, anybody_form.errors
+            pass
 
     else:
         comment_form = CommentsForm()
@@ -311,17 +321,17 @@ def comments_add(request, id):
         anybody = Anybody.objects.filter(email=cmt.email)[0]
         cmt.name = anybody.anyname
         cmt.website = anybody.website
+        cmt.reply = cmt.replyid.all()
 
     comments_count = comments.count()
 
-    context_dict = {
+    context_dict.update({
         'comments_all':comments,
         'comment_form':comment_form,
         'anybody_form':anybody_form,
         'comments_count':comments_count,
-        }
+        })
     return context_dict
-
 
 def comment_show(request, cmt_id):
     '''评论AJAX支持'''
@@ -334,17 +344,19 @@ def comment_show(request, cmt_id):
         comment_html = RequestContext(request, context_dict)
     return HttpResponse(t.render(comment_html))
 
+
 @login_required()
 def del_control(request, delconf='', id=''):
-    '''Delete Comment & Article'''
+    '''Delete Comment & Article & Reply'''
     if delconf=='cmt':
         cmt = get_object_or_404(Comments, pk=id)
-        tid = cmt.acticle_id.all()[0].pk
         cmt.acticle_id.clear()
-        cmt.delete()
-        return HttpResponseRedirect('/articles/%s'%tid)
+        reply =  cmt.replyid.all()
+        reply.delete()
+        cmt.delete()            # 删除评论
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
-    elif delconf=='article':
+    if delconf=='article':
         article = get_object_or_404(Blog, id=id)
         tags = article.tags.all()
         for tag in tags:
@@ -355,4 +367,37 @@ def del_control(request, delconf='', id=''):
         article.delete()
         return HttpResponseRedirect('/articles/')
 
+    if delconf=='reply':
+        print id
+        reply_comt = get_object_or_404(Replytocomt, pk=id)
+        reply_comt.delete()     # 删除楼中楼评论
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
+
+# 回复.楼中楼
+def reply_to_comt(request, reply_id):
+    ''' 存有 Session 方可进行楼中楼的回复 '''
+    if request.method == 'POST' and request.session.get('reply_email'):
+        context_dict = {}
+        reply_text = request.POST.get('text')
+
+        # 储存
+        comt = Comments.objects.filter(pk=reply_id)[0]
+        anybody = Anybody.objects.filter(email=request.session.get('reply_email'))[0]
+
+        reply = Replytocomt(replyuser=anybody, replytext=reply_text)
+        reply.save()
+        comt.replyid.add(reply.pk)
+
+        context_dict['result'] = 'Create post successful!'
+        context_dict['reply_id'] = reply_id
+        context_dict['reply_pk'] = reply.pk
+        context_dict['reply_text'] = reply.replytext
+        context_dict['reply_user'] = reply.replyuser.anyname
+        context_dict['reply_time'] = reply.createtime
+
+        # t = get_template('blog/reply_show.html')
+        # reply_html = RequestContext(request, context_dict)
+        # return HttpResponse(t.render(reply_html))
+
+    return HttpResponseRedirect(request.META['HTTP_REFERER'])

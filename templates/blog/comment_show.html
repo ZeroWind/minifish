@@ -9,10 +9,10 @@
     <div class="row-fluid">
         <div class="col-sm-11">
         <strong><i class="glyphicon glyphicon-user"></i> {{ comt.name }}</strong>
-        <i class="glyphicon glyphicon-comment"></i> {{  forloop.counter }}楼
+         {{  forloop.counter }}楼
         <span>
             <i class="glyphicon glyphicon-time"></i> {{ comt.commentstime|date:"H:i Y-m-d" }}
-            <a href="{{ comt.email }}"><i class="glyphicon glyphicon-envelope"></i></a>
+            <a href="mailto:{{ comt.email }}"><i class="glyphicon glyphicon-envelope"></i></a>
             <a href="{{ comt.website }}"><i class="glyphicon glyphicon-home"></i></a>
         </span>
         </div>
@@ -24,9 +24,33 @@
 
     <div class="col-sm-12">
         <p>{{ comt.comments|markdown }}</p>
+    </div>
+    <div class="col-sm-12">
+        <div class="col-sm-11 col-sm-offset-1">
+            <div >
+                {% for r in comt.reply %}
+                <p>
+                    <strong>{{ r.replytext }}</strong> -
+                    <em>{{ r.replyuser.anyname }}</em> -
+                    <span>{{ r.createtime }}</span> -
+                    <a id='delete-post-{{ r.pk }}'>delete me</a>
+                </p>
+                {% endfor %}
+
+                <p id="talk-{{ comt.id }}">
+                    <!-- Reply Form Ajax -->
+                </p>
+            </div>
+            <form role="form" name="form2" method="post" id="post_reply_form_{{comt.id}}" action="{% url 'reply_to_comt' comt.id %}">
+            {% csrf_token %}
+            <!-- <input type='hidden' name='reply' value="{#% url 'reply_to_comt' comt.id %#}"/> -->
+            <p class="text-right" id="post_reply_{{ comt.id }}">
+                <button id="#id_comments_{{ comt.id }}" class="btn btn-default btn-xs" type="button" onclick="replyHandler('{{ comt.id }}');" >回复<i class="glyphicon glyphicon-comment"></i></button>
+            </p>
+            </form>
+        </div>
         <hr />
     </div>
-    </div>
+    </div><!-- row-fluid -->
     {% endfor %}
-    </div>
-</div>
+</div><!-- cmt -->

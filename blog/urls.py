@@ -6,7 +6,7 @@ from django.conf.urls import patterns, url
 
 
 urlpatterns = patterns('blog.views',
-    url(r'^$', 'index'),
+    url(r'^$', 'article_list'),
     url(r'^index/$', 'index', name = 'index'),
     url(r'^about/$', 'about', name = 'about'),
 
@@ -25,9 +25,11 @@ urlpatterns = patterns('blog.views',
     # AJAX
     url(r'^like_article/$', 'like_article', name='like_article'),
     url(r'^comment_show/(?P<cmt_id>\d+)/$', 'comment_show', name='comment_show'),
+    url(r'^reply_to_comt/(?P<reply_id>\d+)/$', 'reply_to_comt', name='reply_to_comt'),
 
     # Delete
     url(r'^del_article/(?P<id>\d+)/$', 'del_control', kwargs={'delconf':'article'}, name='del_article'),
     url(r'^del_comment/(?P<id>\d+)/$', 'del_control', kwargs={'delconf':'cmt'}, name='del_comment'),
+    url(r'^del_reply/(?P<id>\d+)/$', 'del_control', kwargs={'delconf':'reply'}, name='del_reply'),
 )
 

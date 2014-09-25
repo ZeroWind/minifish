@@ -10,12 +10,14 @@
     {{ comment_form.media }}
 
     <script>
+
         function bindPostCommentHandler() {
+            // 获得 comment_form 表单
             $('#comment_form').submit(function() {
                 $.ajax({
                     type: "POST",
                     data: $('#comment_form').serialize(),
-                    url: "{% url 'comment_show' cmt_id %}",
+                    url: "{% url 'comment_show' tid %}",
                     cache: false,
                     dataType: "html",
                     success: function(html, textStatus) {
@@ -29,7 +31,36 @@
                 });
                 return false;
             });
-        }
+        };
+
+        function replyPostHandler(cmt_id){
+            $('#post_reply_form'+cmt_id).submit(function(){
+                $.ajax({
+                    type:'POST',
+                    // data:{ the_post : $('#post-text').val() },
+                    data : $('#post-text').serialize(),
+                    url:"../../reply_to_comt/"+cmt_id+"/",
+                    cache: false,
+                    dataType: "html",
+                    success: function(html, textStatus){
+                        $("#talk-"+cmt_id).replaceWith('<p id="talk-{{ reply_id }}"> <strong>{{ reply_text }}</strong> - <em>{{ reply_user }}</em> - <span>{{ reply_time }}</span> - <a id="delete-post-{{ reply_pk }}">delete me</a></p>');
+                        $('#post_reply_form'+cmt_id)[0].reset();
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+
+                        $("#talk-"+cmt_id).replaceWith('<div class="alert alert-danger" role="alert">您的评论暂时无法提交, 请检查相关字段是否填写正确.</div>');
+                    }
+                });
+                return false;
+            });
+        };
+
+
+        function replyHandler(cmt_id){
+            $("#id_comments_"+cmt_id).hide();
+            $("#post_reply_"+cmt_id).html('<div class="form-group"><textarea class="form-control" rows="1" id="post-text" name="text" placeholder="Say something..." required="True" type="text" ></textarea></div><div id="results"></div><input type="submit" name="submit2" value="发表" class="btn btn-primary btn-xs" onclick="replyPostHandler('+cmt_id+');">');
+        };
+
     </script>
 {% endblock %}
 
@@ -105,11 +136,11 @@
     <div class="row-fluid">
         <div class="col-sm-11">
         <strong><i class="glyphicon glyphicon-user"></i> {{ comt.name }}</strong>
-        <i class="glyphicon glyphicon-comment"></i> {{  forloop.counter }}楼
+         {{  forloop.counter }}楼
         <span>
-            <i class="glyphicon glyphicon-time"></i> {{ comt.commentstime|date:"H:i Y-m-d" }}
-            <a href="{{ comt.email }}"><i class="glyphicon glyphicon-envelope"></i></a>
-            <a href="{{ comt.website }}"><i class="glyphicon glyphicon-home"></i></a>
+            <i class="glyphicon glyphicon-time" title="{{ comt.commentstime|date:"H:i Y-m-d" }}"></i> {{ comt.commentstime|date:"H:i Y-m-d" }}
+            <a href="mailto:{{ comt.email }}" title="{{ comt.email }}"><i class="glyphicon glyphicon-envelope"></i></a>
+            <a href="{{ comt.website }}" title="{{ comt.website }}"><i class="glyphicon glyphicon-home"></i></a>
         </span>
         </div>
         <div class="col-sm-1">
@@ -120,16 +151,44 @@
 
     <div class="col-sm-12">
         <p>{{ comt.comments|markdown }}</p>
+    </div>
+    <div class="col-sm-12">
+        <div class="col-sm-11 col-sm-offset-1">
+            <div >
+                {% for r in comt.reply %}
+                    <p>
+                        <strong>{{ r.replyuser.anyname }} </strong><span><i class="glyphicon glyphicon-time" title="{{ r.createtime|date:"H:i Y-m-d" }}" ></i></span><em> {{ r.replytext }}</em>
+
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'del_reply' r.pk %}" id='{{ r.pk }}'><i class="glyphicon glyphicon-trash"></i></a>
+                        {% endif %}
+                    </p>
+                {% endfor %}
+
+                <p id="talk-{{ comt.id }}">
+                    <!-- Reply Form Ajax -->
+                </p>
+            </div>
+            {% if reply_email or user.is_authenticated%}
+                <form role="form" name="form2" method="post" id="post_reply_form_{{comt.id}}" action="{% url 'reply_to_comt' comt.id %}">
+                {% csrf_token %}
+                <input type='hidden' name='reply' value="{% url 'reply_to_comt' comt.id %}"/>
+                <p class="text-right" id="post_reply_{{ comt.id }}">
+                    <button id="#id_comments_{{ comt.id }}" class="btn btn-default btn-xs" type="button" onclick="replyHandler('{{ comt.id }}');" >回复<i class="glyphicon glyphicon-comment"></i></button>
+                </p>
+                </form>
+            {% endif %}
+        </div>
         <hr />
     </div>
-    </div>
+    </div><!-- row-fluid -->
     {% endfor %}
-    </div>
-</div>
+</div><!-- cmt -->
+</div><!-- box -->
 
 <br/>
 <div class="box">
-        <form class="form-signin" id="comment_form" method="post" action="">
+        <form class="form-signin" name="form1" id="comment_form" method="post" action=''>
             {% csrf_token %}
             {% for field in anybody_form.visible_fields %}
                 {{ field.errors }}
@@ -141,8 +200,8 @@
                 <strong>{{ field.label }}</strong>     <small>{{field.help_text}}</small><br/>
                 {{ field }}<br />
             {% endfor %}
-        <input type='hidden' name='next' value="{% url 'comment_show' cmt_id %}"/>
-        <button class="btn btn-primary" type="submit" name="submit" />提交</button></p>
+        <input type='hidden' name='next' value="{% url 'comment_show' tid %}"/>
+        <button class="btn btn-primary" type="submit" name="submit1" onclick="bindPostCommentHandler();" />提交</button></p>
         </form>
 
         <ul>
@@ -150,8 +209,6 @@
             <li><span>请勿发布与主题无关的评论</span></li>
         </ul>
         <div id="comment_errors"></div>
-
-
 </div>
 
 

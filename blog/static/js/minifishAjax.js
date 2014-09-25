@@ -10,15 +10,15 @@ $(document).ready(function() {
         $("#showlike").html('<button class="btn btn-xs btn-success" type="button" disabled="disabled">已赞</button>');
     });
 
+
     $("textarea").addClass(" form-control");
     $("#comment_form input").addClass(" form-control").css({
         width:"50%",
     });
 
-    bindPostCommentHandler(); // 评论AJAX
+    // bindPostCommentHandler(); // 评论AJAX
+
 });
-
-
 
 
 $(document).ajaxSend(function(event, xhr, settings) {
